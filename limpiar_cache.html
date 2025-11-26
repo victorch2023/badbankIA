@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar Caché - BadBank</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #d32f2f; }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1976d2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧹 Limpiar Caché del Navegador</h1>
+        
+        <div class="step">
+            <h3>Método 1: Atajos de Teclado (Más Rápido)</h3>
+            <p><strong>Mac:</strong> Presiona <code>Cmd + Shift + Delete</code></p>
+            <p><strong>Windows/Linux:</strong> Presiona <code>Ctrl + Shift + Delete</code></p>
+            <p>Luego selecciona "Caché" y borra los datos.</p>
+        </div>
+
+        <div class="step">
+            <h3>Método 2: Ventana Privada/Incógnito</h3>
+            <p><strong>Chrome/Edge:</strong> <code>Cmd+Shift+N</code> (Mac) o <code>Ctrl+Shift+N</code> (Windows)</p>
+            <p><strong>Firefox:</strong> <code>Cmd+Shift+P</code> (Mac) o <code>Ctrl+Shift+P</code> (Windows)</p>
+            <p><strong>Safari:</strong> <code>Cmd+Shift+N</code> (Mac)</p>
+            <p>Luego ve a: <a href="https://victorch2023.github.io/badbankIA/" target="_blank">https://victorch2023.github.io/badbankIA/</a></p>
+        </div>
+
+        <div class="step">
+            <h3>Método 3: Hard Reload</h3>
+            <p>En la página de BadBank, presiona:</p>
+            <p><strong>Mac:</strong> <code>Cmd + Shift + R</code></p>
+            <p><strong>Windows/Linux:</strong> <code>Ctrl + Shift + R</code></p>
+            <p>Repite 3 veces si es necesario.</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="https://victorch2023.github.io/badbankIA/" class="button">Ir a BadBank</a>
+            <button onclick="location.reload(true)" class="button">Recargar Esta Página</button>
+        </div>
+
+        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+            <h3>✅ Después de Limpiar el Caché:</h3>
+            <ul>
+                <li>NO deberías ver errores de "Init(...): Nothing was returned"</li>
+                <li>NO deberías ver errores de "Invalid DOM property 'class'"</li>
+                <li>SÍ deberías ver "hola" en la consola</li>
+                <li>La aplicación debería cargar correctamente</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Forzar recarga sin caché
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
