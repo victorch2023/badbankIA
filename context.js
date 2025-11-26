@@ -4,15 +4,17 @@ const firebaseConfig = {
 
 // Inicializar Firebase solo si está disponible y no está ya inicializado
 let app;
-if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-    // Firebase ya está inicializado
-    app = firebase.app();
-} else if (typeof firebase !== 'undefined') {
-    // Firebase está disponible pero no inicializado
+if (typeof firebase !== 'undefined') {
     try {
-        app = firebase.initializeApp(firebaseConfig);
-    } catch (error) {
-        console.error('Error al inicializar Firebase:', error);
+        // Intentar obtener la app existente (puede fallar si no está inicializada)
+        app = firebase.app();
+    } catch (e) {
+        // Si no existe, inicializarla
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+        } catch (error) {
+            console.error('Error al inicializar Firebase:', error);
+        }
     }
 } else {
     console.error('Firebase no está disponible. Asegúrate de que los scripts de Firebase se carguen antes de context.js');
