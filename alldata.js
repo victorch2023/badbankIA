@@ -8,7 +8,7 @@ function AllData(){
             bgcolor="primary"
             header="All Data"
             body={
-            <card>    
+            <div>    
               <h5 className="card-title">Registered Users</h5>
                 <table className="table">
                   <thead>
@@ -60,7 +60,7 @@ function AllData(){
                     ))}      
                   </tbody>
                 </table>
-            </card>
+            </div>
 
             }
 
