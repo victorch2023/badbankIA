@@ -3,21 +3,31 @@ function NavBar(){
     const ctx = React.useContext(UserContext);
 
     React.useEffect(() => {
-        ctx.users.forEach((user, index) => {
-            if (user.logstatus === true){
-                ctx.setLoggedIndex(index);
-            }
-        });
+        // Buscar el usuario logueado por su logstatus
+        const loggedUser = ctx.users.find(user => user.logstatus === true);
+        if (loggedUser && loggedUser.firebaseKey) {
+            ctx.setLoggedUserKey(loggedUser.firebaseKey);
+        } else if (!loggedUser) {
+            ctx.setLoggedUserKey(null);
+        }
         },[ctx.users]);
 
     function logout(){
-        const db = firebase.database();
-        db.ref('users/' + ctx.loggedIndex).update({
-            logstatus:false
-        });
+        if (!ctx.loggedUserKey) {
+            return;
+        }
 
-        ctx.users[ctx.loggedIndex].logstatus = false;
-        ctx.setLoggedIndex(-1);
+        const db = firebase.database();
+        db.ref('users/' + ctx.loggedUserKey).update({
+            logstatus:false
+        }, (error) => {
+            if (error) {
+                console.error('Error al cerrar sesión:', error);
+                alert('Error al cerrar sesión: ' + error.message);
+            } else {
+                ctx.setLoggedUserKey(null);
+            }
+        });
     }
 
 
@@ -54,14 +64,14 @@ function NavBar(){
                 </div>
 
                 <div>
-                    {ctx.loggedIndex >= 0 ? 'Logged User:' : ''}
+                    {ctx.loggedUserKey ? 'Logged User:' : ''}
                 </div>
     
                 <div style={{fontWeight: 'bold', marginLeft: '10px'}} title='Logged user'>
-                    {ctx.loggedIndex >= 0 ? ctx.users[ctx.loggedIndex].email : ''}
+                    {ctx.loggedUserKey ? (ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey)?.email || '') : ''}
                 </div>
                 
-                {ctx.loggedIndex >= 0 ? (                 
+                {ctx.loggedUserKey ? (                 
                     <button type="submit" className="btn btn-light" onClick={logout} style={{background: 'black', color: 'white', marginLeft: '20px'}} title='to logout'>Logout</button>
                 ) : ''
                 }

@@ -1,7 +1,22 @@
 const firebaseConfig = {
     databaseURL : "https://badbank-e4a9d-default-rtdb.firebaseio.com"
 };
-const app = firebase.initializeApp(firebaseConfig);
+
+// Inicializar Firebase solo si está disponible y no está ya inicializado
+let app;
+if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+    // Firebase ya está inicializado
+    app = firebase.app();
+} else if (typeof firebase !== 'undefined') {
+    // Firebase está disponible pero no inicializado
+    try {
+        app = firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+        console.error('Error al inicializar Firebase:', error);
+    }
+} else {
+    console.error('Firebase no está disponible. Asegúrate de que los scripts de Firebase se carguen antes de context.js');
+}
 
 const Route         = ReactRouterDOM.Route;
 const Link          = ReactRouterDOM.Link;
@@ -10,7 +25,7 @@ const UserContext   = React.createContext(null);
 
 const UserContextProvider = ({children}) => {
 
-    const [loggedIndex, setLoggedIndex] = React.useState(-1);
+    const [loggedUserKey, setLoggedUserKey] = React.useState(null);
 
     const [users, setUsers] = React.useState([]);
     const [ops, setOps] = React.useState([]);
@@ -20,7 +35,7 @@ const UserContextProvider = ({children}) => {
     const [ops, setOps] = React.useState([{userSearched:'rita@mit.edu',type:'deposit',amount:100, newBalance:200,date:'2023-11-17T02:31:52.815Z'},{userSearched:'rita@mit.edu',type:'deposit',amount:200, newBalance:400,date:'2023-11-17T02:32:52.815Z'},{userSearched:'rita@mit.edu',type:'deposit',amount:300, newBalance:700,date:'2023-11-17T02:33:52.815Z'},{userSearched:'rita@mit.edu',type:'deposit',amount:1000, newBalance:1700,date:'2023-11-17T02:34:52.815Z'}]);
 */
     return(
-        <UserContext.Provider value={{users, ops, loggedIndex, setLoggedIndex, setUsers, setOps}}>
+        <UserContext.Provider value={{users, ops, loggedUserKey, setLoggedUserKey, setUsers, setOps}}>
             {children}
         </UserContext.Provider>
 

@@ -63,16 +63,25 @@ function CreateAccount(){
         if (!validateNewEmail(email))                return;
 
         const db = firebase.database();
-        db.ref('users/' + ctx.users.length).set({
+        const newUser = {
             name,
             email,
             password,
             balance:100,
             logstatus:false
-        });
+        };
 
-        ctx.users.push({name,email,password,balance:100,logstatus:false});
-        setShow(false);
+        // Usar push() para generar una clave única automáticamente
+        const userRef = db.ref('users').push(newUser, (error) => {
+            if (error) {
+                setStatus('Error al crear cuenta: ' + error.message);
+                setTimeout(() => setStatus(''), 3000);
+                console.error('Error al crear usuario:', error);
+            } else {
+                // El listener en init.js actualizará automáticamente el estado
+                setShow(false);
+            }
+        });
     }
 
     function signUpFB (){
@@ -93,10 +102,18 @@ function CreateAccount(){
                         balance:100,
                         logstatus:false
                     };
-                    db.ref('users/' + ctx.users.length).set(newUser);
-
-                    ctx.users.push(newUser);
-                    setShow(false);
+                    
+                    // Usar push() para generar una clave única automáticamente
+                    db.ref('users').push(newUser, (error) => {
+                        if (error) {
+                            setStatus('Error al crear cuenta con Facebook: ' + error.message);
+                            setTimeout(() => setStatus(''), 3000);
+                            console.error('Error al crear usuario con Facebook:', error);
+                        } else {
+                            // El listener en init.js actualizará automáticamente el estado
+                            setShow(false);
+                        }
+                    });
                 })
             }
 

@@ -7,7 +7,7 @@ function Withdraw(){
     const type = 'withdraw'
 
     React.useEffect(() => {
-        if (ctx.loggedIndex < 0){
+        if (!ctx.loggedUserKey){
             setStatus('Please LOGIN first')
         }
         },[ctx]);
@@ -27,7 +27,18 @@ function Withdraw(){
             }
     
             const number = parseFloat(field);
-            const balance = ctx.users[ctx.loggedIndex].balance
+            if (!ctx.loggedUserKey) {
+                setStatus('Please LOGIN first');
+                setTimeout(() => setStatus(''), 3000);
+                return false;
+            }
+            const loggedUser = ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey);
+            if (!loggedUser) {
+                setStatus('Usuario no encontrado');
+                setTimeout(() => setStatus(''), 3000);
+                return false;
+            }
+            const balance = loggedUser.balance;
             if(number > balance){
                 setStatus('Error: Withdraw exceeds balance');
                 setTimeout(() => setStatus(''), 3000);
@@ -40,21 +51,46 @@ function Withdraw(){
     function handleWithdraw(){
         console.log(amount);
         if (!validate(amount))        return;
-        ctx.users[ctx.loggedIndex].balance -= Number(amount);
+        
+        if (!ctx.loggedUserKey) {
+            setStatus('Please LOGIN first');
+            setTimeout(() => setStatus(''), 3000);
+            return;
+        }
 
-        const userSearched = ctx.users[ctx.loggedIndex].email;
-        const newBalance = ctx.users[ctx.loggedIndex].balance;
+        const loggedUser = ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey);
+        if (!loggedUser) {
+            setStatus('Usuario no encontrado');
+            setTimeout(() => setStatus(''), 3000);
+            return;
+        }
+
+        const newBalance = loggedUser.balance - Number(amount);
+        const userSearched = loggedUser.email;
         const date = new Date().toString();
 
         const db = firebase.database();
-        db.ref('users/' + ctx.loggedIndex).update({
-            balance:newBalance
+        
+        // Actualizar balance en Firebase
+        db.ref('users/' + ctx.loggedUserKey).update({
+            balance: newBalance
+        }, (error) => {
+            if (error) {
+                setStatus('Error al realizar retiro: ' + error.message);
+                setTimeout(() => setStatus(''), 3000);
+                console.error('Error al actualizar balance:', error);
+            } else {
+                // Crear operación en Firebase
+                db.ref('ops').push({userSearched,type,amount,newBalance,date}, (opError) => {
+                    if (opError) {
+                        console.error('Error al guardar operación:', opError);
+                        // Aunque falle guardar la operación, el retiro ya se hizo
+                    }
+                    // El listener en init.js actualizará automáticamente el estado
+                    setShow(false);
+                });
+            }
         });
-
-        ctx.ops.push({userSearched,type,amount,newBalance,date});
-        db.ref('ops').push({userSearched,type,amount,newBalance,date});
-
-        setShow(false);
     }
 
 
@@ -78,7 +114,7 @@ function Withdraw(){
             body={show ? (
                 <>
                 Balance<br/>
-                <h2>USD: {ctx.loggedIndex >= 0 ? ctx.users[ctx.loggedIndex].balance : '(No user logged)'}</h2><br/><br/>
+                <h2>USD: {ctx.loggedUserKey ? (ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey)?.balance || 0) : '(No user logged)'}</h2><br/><br/>
                 <p>Set a withdraw</p>
                 Amount<br/>
                 <input type="text" className="form-control" id="amount" placeholder="Enter amount" value={amount} onChange={handleOnChange} /><br/>
@@ -87,7 +123,7 @@ function Withdraw(){
             ) : (
                 <>
                 Balance<br/>
-                <h2>USD: {ctx.users[ctx.loggedIndex].balance}</h2><br/><br/>
+                <h2>USD: {ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey)?.balance || 0}</h2><br/><br/>
                 <h5>Success withdraw</h5>
                 <button type="submit" className="btn btn-light" onClick={clearForm}>Set another withdraw</button>
                 </>

@@ -3,7 +3,7 @@ function Balance(){
     const [status, setStatus]       = React.useState('');
 
     React.useEffect(() => {
-        if (ctx.loggedIndex < 0){
+        if (!ctx.loggedUserKey){
             setStatus('Please LOGIN first')
         }
         },[ctx]);
@@ -16,7 +16,7 @@ function Balance(){
             body={
                 <>
                 Balance<br/>
-                <h2>USD: {ctx.loggedIndex >= 0 ? ctx.users[ctx.loggedIndex].balance : '-'}</h2><br/><br/>
+                <h2>USD: {ctx.loggedUserKey ? (ctx.users.find(user => user.firebaseKey === ctx.loggedUserKey)?.balance || 0) : '-'}</h2><br/><br/>
                 </>
             }
 

@@ -6,7 +6,7 @@ function Login(){
     const [logged, setLogged]       = React.useState('');
 
     React.useEffect(() => {
-    if (ctx.loggedIndex < 0){
+    if (!ctx.loggedUserKey){
         setLogged(false)
     } else {
         setLogged(true)
@@ -23,24 +23,31 @@ function Login(){
     }
 
     function verify(){
-        const newIndex = ctx.users.findIndex(user => user.email === email && user.password === password);
-        console.log('newIndex: '+newIndex);
-        ctx.setLoggedIndex(newIndex);
-        if (newIndex < 0){
+        const foundUser = ctx.users.find(user => user.email === email && user.password === password);
+        if (!foundUser || !foundUser.firebaseKey){
             setStatus('Error in data');
             setTimeout(() => setStatus(''), 3000);
             return false;
         }
 
+        const userKey = foundUser.firebaseKey;
+        console.log('User key: ' + userKey);
+        
         const db = firebase.database();
-        db.ref('users/' + newIndex).update({
+        db.ref('users/' + userKey).update({
             logstatus:true
+        }, (error) => {
+            if (error) {
+                setStatus('Error al iniciar sesión: ' + error.message);
+                setTimeout(() => setStatus(''), 3000);
+                console.error('Error al actualizar logstatus:', error);
+            } else {
+                ctx.setLoggedUserKey(userKey);
+                setEmail('');
+                setPassword('');
+                setLogged(true);
+            }
         });
-
-        ctx.users[newIndex].logstatus = true;
-        setEmail('');
-        setPassword('');
-        setLogged(true);
     }
 
     function handleLogin(){
@@ -60,24 +67,31 @@ function Login(){
             if (response.status === 'connected'){
                 FB.api('/me',{fields:'name,email'},function(response){
                     console.log(response);
-                    const newIndex = ctx.users.findIndex(user => user.email === response.email);
-                    console.log('newIndex: '+newIndex);
-                    ctx.setLoggedIndex(newIndex);
-                    if (newIndex < 0){
+                    const foundUser = ctx.users.find(user => user.email === response.email);
+                    if (!foundUser || !foundUser.firebaseKey){
                         setStatus('Error in data');
                         setTimeout(() => setStatus(''), 3000);
                         return false;
                     }
             
-                    const db = firebase.database();
-                    db.ref('users/' + newIndex).update({
-                        logstatus:true
-                    });
+                    const userKey = foundUser.firebaseKey;
+                    console.log('User key: ' + userKey);
             
-                    ctx.users[newIndex].logstatus = true;
-                    setEmail('');
-                    setPassword('');
-                    setLogged(true);
+                    const db = firebase.database();
+                    db.ref('users/' + userKey).update({
+                        logstatus:true
+                    }, (error) => {
+                        if (error) {
+                            setStatus('Error al iniciar sesión con Facebook: ' + error.message);
+                            setTimeout(() => setStatus(''), 3000);
+                            console.error('Error al actualizar logstatus:', error);
+                        } else {
+                            ctx.setLoggedUserKey(userKey);
+                            setEmail('');
+                            setPassword('');
+                            setLogged(true);
+                        }
+                    });
                 })
             }
 
@@ -86,15 +100,24 @@ function Login(){
 
 
     function logout(){
+        if (!ctx.loggedUserKey) {
+            setLogged(false);
+            return;
+        }
 
         const db = firebase.database();
-        db.ref('users/' + ctx.loggedIndex).update({
+        db.ref('users/' + ctx.loggedUserKey).update({
             logstatus:false
+        }, (error) => {
+            if (error) {
+                setStatus('Error al cerrar sesión: ' + error.message);
+                setTimeout(() => setStatus(''), 3000);
+                console.error('Error al actualizar logstatus:', error);
+            } else {
+                ctx.setLoggedUserKey(null);
+                setLogged(false);
+            }
         });
-
-        ctx.users[ctx.loggedIndex].logstatus = false;
-        ctx.setLoggedIndex(-1);
-        setLogged(false);
     }
 
         return(
