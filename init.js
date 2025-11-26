@@ -53,4 +53,5 @@ function Init () {
 
         },[]);
 
+    return null;
 }

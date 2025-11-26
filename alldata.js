@@ -9,8 +9,8 @@ function AllData(){
             header="All Data"
             body={
             <card>    
-              <h5 class="card-title">Registered Users</h5>
-                <table class="table">
+              <h5 className="card-title">Registered Users</h5>
+                <table className="table">
                   <thead>
                     <tr>
                       <th scope="col">Name</th>
@@ -37,8 +37,8 @@ function AllData(){
     <br/>
     <br/>
                 
-             <h5 class="card-title">Bank Operations</h5>
-                <table class="table">
+             <h5 className="card-title">Bank Operations</h5>
+                <table className="table">
                   <thead>
                     <tr>
                       <th scope="col">User</th>
